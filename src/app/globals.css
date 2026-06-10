@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-blue: #1B3A5C;
+  --color-yellow: #F2C744;
+  --color-offwhite: #F7F6F2;
+  --color-dark: #2D2D2D;
+  --color-muted: #6B6B6B;
+  --color-light-muted: #5A5A5A;
+  --font-display: var(--font-space-grotesk), sans-serif;
+  --font-body: var(--font-inter), sans-serif;
+  /* Strong ease-out curve for entrances + press feedback (generates the
+     `ease-snappy` utility). Built-in eases are too weak to feel intentional. */
+  --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-dark);
+  font-family: var(--font-body);
+}
+
+/* Scroll-reveal entrance (see Reveal.tsx). Content sits 16px low + faded, then
+   eases up when the IntersectionObserver flags it shown. CSS transition (not a
+   keyframe) so a fast scroll retargets smoothly instead of restarting. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 450ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 450ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Reduced motion: keep the fade, drop the movement (reduced ≠ zero). */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transform: none;
+    transition: opacity 200ms ease;
+  }
+}
+
+/* Draw-in variant: a line/rule that scales out from its left edge on reveal. */
+.reveal-draw {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 600ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reveal-draw[data-shown="true"] {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-draw {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Collaborators logo carousel (TrustStrip) */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marquee-viewport {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+/* Pause the drift when a visitor hovers the strip */
+.marquee-viewport:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Respect reduced-motion: drop the duplicate copy and show a static centered wrap */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: none;
+  }
+  .marquee-viewport {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .marquee-dup {
+    display: none;
+  }
+}
