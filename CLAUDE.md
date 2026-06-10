@@ -54,15 +54,13 @@ Everything lives under `src/`:
 - Content (names, copy, labels) should be finalized in the design before coding to avoid drift
 
 ### Deployment
-- Build and preview locally (`npm run build && npx next start -p 3100`) and verify at mobile + desktop widths before deploying to Vercel
+- Build and preview locally (`npm run build && npx next start -p 3100`) and verify at mobile + desktop widths before deploying
 - Deploy once when everything matches, not incrementally after each small fix
-- Use `npx vercel deploy --prod --yes` for production deploys
-- **CRITICAL: `semantify.co` is a manual Vercel alias, NOT auto-tracked to the latest production deployment.** A `vercel deploy --prod` alone does NOT update the live site — the domain stays pinned to whatever deployment the alias last pointed at. After every prod deploy you MUST re-point it:
-  ```bash
-  npx vercel alias set <new-deployment-url> semantify.co
-  ```
-  The deploy output prints `<new-deployment-url>` (e.g. `website-xxxxxxxxx-xiaoli-chens-projects-b047d6ee.vercel.app`). Do NOT alias `www.semantify.co` directly — it has a redirect-to-apex rule that a direct alias clobbers (causes a 401).
-- Verify on the **live domain**, not the deploy URL: `curl -s -o /dev/null -w '%{http_code}' https://semantify.co/<a-changed-or-new-route>` should return `200`. The `*.vercel.app` deployment URLs are protected by Vercel auth and return `401` to curl — that's expected, not an error.
+- **This repo is connected to the Vercel project `xiaoli-chens-projects-b047d6ee/website` via Git integration, and `semantify.co` is attached to that project as a domain (set up 2026-06-10).** Because of that:
+  - Pushing to `main` triggers an automatic production build + deploy, and `semantify.co` auto-serves the latest production deployment. **No manual `vercel alias set` step** (the old monorepo workflow needed one — it no longer applies).
+  - You can also deploy manually from this dir with `npx vercel deploy --prod --yes`; the attached domain still auto-tracks the new production deployment.
+  - The apex `semantify.co` 308-redirects to the canonical `www.semantify.co`.
+- Verify on the **live domain** (follow redirects): `curl -sL -o /dev/null -w '%{http_code}' https://semantify.co/` should resolve to `www.semantify.co` and return `200`. The raw `*.vercel.app` deployment URLs are protected by Vercel auth and return `401` to curl — that's expected, not an error.
 - Social link previews are cached by platforms — after changing share metadata, re-scrape in LinkedIn Post Inspector / X Card Validator / Facebook Sharing Debugger.
 
 ### Responsive Design
@@ -72,7 +70,7 @@ Everything lives under `src/`:
 
 ### Git / GitHub
 - This repo's remote is HTTPS: `https://github.com/semantify-consulting/semantify-website.git` (org: `semantify-consulting`). It is **public**. The private docs repo is `semantify-consulting/semantify`.
-- No GitHub auto-deploy is connected — Vercel deploys are manual via the CLI (see Deployment).
+- This repo is connected to Vercel via Git integration — **pushing to `main` auto-deploys to production** (see Deployment).
 - Established flow for small website edits: commit directly on `main` and `git push origin main` (no PR required)
 - Keep `.DS_Store` and stray/unused assets out of commits (`.DS_Store` is gitignored)
 
@@ -84,11 +82,9 @@ npm run build && npx next start -p 3100
 # Quality gate (no test suite — run both before commit/deploy)
 npm run lint && npm run build
 
-# Deploy to Vercel — TWO steps; the alias is required for semantify.co to update
-npx vercel deploy --prod --yes
-#   then re-point the live domain at the deployment URL just printed:
-npx vercel alias set <new-deployment-url> semantify.co
+# Deploy: push to main (auto-deploys via Vercel Git integration) — or manually:
+npx vercel deploy --prod --yes   # semantify.co (attached to the project) auto-tracks the new prod deploy
 
-# Verify live (should be 200; the *.vercel.app deploy URL returns 401 by design)
-curl -s -o /dev/null -w '%{http_code}\n' https://semantify.co/
+# Verify live (follow redirects → www.semantify.co, expect 200; *.vercel.app URLs 401 by design)
+curl -sL -o /dev/null -w '%{http_code}\n' https://semantify.co/
 ```
