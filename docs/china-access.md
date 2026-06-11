@@ -48,33 +48,43 @@ Net effect: every page with a "Book a call" action now also shows `hello@semanti
 
 ---
 
-## Tier 0 — diagnose (manual, not yet run)
+## Tier 0 — probe baseline ✅ RUN (2026-06-11, Chinafy Visual Speed Test)
 
-Run the China-side probes to get a baseline (do these in a browser — they can't run from this machine/CLI):
+Chinafy visual speed test, Beijing / Shanghai / Guangzhou vs. international baseline (INT). Per content type, resources that actually loaded:
 
-- https://www.chinafy.com — free China test report
-- https://boce.aliyun.com — Alibaba Cloud probe (many mainland locations)
-- https://www.17ce.com — mainland-wide ping / HTTP tests
+| Resource | INT (baseline) | Beijing | Shanghai | Guangzhou |
+| --- | --- | --- | --- | --- |
+| Images | 10 / 971 KB | 2 / 62 KB | 1 / 37 KB | **10 / 971 KB** |
+| JavaScript | 9 / 181 KB | 6 / 61 KB | 1 / 9 KB | **9 / 181 KB** |
+| CSS | 1 / 7.7 KB | 1 / 7.7 KB | **— missing** | 1 / 7.7 KB |
+| Font | 2 / 69.6 KB | 2 / 69.6 KB | 2 / 69.6 KB | 2 / 69.6 KB |
+| Avg load (all ranges) | US 1.0s | — | — | CN 2.6s = **2.5× slower** |
 
-Record, per probe: DNS resolution (poisoned IP vs. correct), TCP connect, TLS handshake, HTTP status, and visually-complete load time. This baseline tells us whether any DNS work (Tier 1) is even needed.
+**Verdict: partially accessible / degraded, NOT fully blocked.**
 
----
+- **Reachable** — DNS resolves and TLS completes in all three cities (resources do come through), so the failure mode is **not** DNS poisoning or an SNI reset. **Guangzhou loaded 100%** of resources.
+- **Intermittent origin throttling** — Beijing partially loaded (images/JS dropped); **Shanghai badly degraded** — only 1 image, 1 JS, and **CSS failed entirely** (page would render unstyled there). Classic GFW throttling / packet-loss on the international route to Vercel's Fastly origin (no China PoP). Varies by city/route/time → "intermittently unreachable" from issue #13.
+- **Audit confirmed** — **fonts loaded fully in every city** (69.6 KB identical across INT/BJ/SH/GZ), proving they're self-hosted, not a Google dependency. Every dropped asset is a first-party file on the Vercel origin; no blocked third-party is the cause.
 
-## Tier 1 — DNS / routing 🔶 OPEN (needs manual decision, not applied)
-
-**Not applied.** Reasons: (1) the site is already on Vercel's current anycast IPs, not the old endpoint the plan assumed; (2) `cname-china.vercel-dns.com` is legacy/retired routing; (3) DNS changes are outward-facing and hard to reverse, so they shouldn't be made blind.
-
-**Do this instead, in order:**
-1. Run the Tier 0 probes above to confirm *how* (and whether) the site fails from China today.
-2. If it fails at the DNS/routing layer, check **current** Vercel guidance for China routing for this anycast setup before changing anything (Vercel docs / dashboard — values change).
-3. Apply any change in the Vercel DNS dashboard, verify no UK/EU regression (`curl -sI https://www.semantify.co | head -5`), wait for TTL, then re-run the probes.
-4. Record the result + date in this file.
+**Implication:** the bottleneck is **origin reachability/bandwidth**, not DNS and not blocked deps. That rules out Tier 1 and means only Tier 3 (a China/HK-hosted mirror) materially fixes the load degradation.
 
 ---
 
-## Tier 3 — Hong Kong static mirror 💤 DEFERRED (only if Tiers 1–2 insufficient)
+## Tier 1 — DNS / routing ❌ NOT INDICATED (per Tier 0 baseline)
 
-Optional `cn.semantify.co` static mirror on Hong Kong infra (HK needs no ICP). The marketing site is static-exportable (`output: 'export'` → `./out`), host on AWS S3 `ap-east-1` + CloudFront or Alibaba Cloud OSS (HK) + CDN, deploy via GitHub Actions on push to `main`, set `rel="canonical"` back to `semantify.co`. Build only if probes show Tiers 1–2 aren't enough. Full sketch is in the source plan.
+**Not applied, and the baseline says don't.** The Tier 0 probe shows DNS resolves and TLS completes from all three cities — the failure mode is origin throttling/packet-loss, **not** DNS poisoning. A DNS record swap cannot fix bandwidth throttling of the Vercel/Fastly origin, so there is nothing to gain here. (Also: the site is already on Vercel's current anycast IPs, and `cname-china.vercel-dns.com` is legacy/retired routing.) Revisit only if a future probe shows an actual poisoned/failed DNS result.
+
+---
+
+## Tier 3 — China/HK static mirror 🔶 THE REAL LEVER (decision pending)
+
+The Tier 0 baseline points here: a mirror on China-accessible infra is the only thing that materially fixes the load degradation without an ICP filing. **Decision is a business call** — worth the build + ongoing maintenance only if the mainland audience justifies it. Options, low→high effort:
+
+- **Gitee Pages mirror** (issue #13's suggestion) — host the static export on `*.gitee.io` (already GFW-cleared, no ICP). Cheapest; Gitee Pages has content-review friction and is best for a simple text/image mirror.
+- **`cn.semantify.co` on HK infra** — static export (`output: 'export'` → `./out`) on AWS S3 `ap-east-1` + CloudFront, or Alibaba Cloud OSS (HK) + CDN. HK needs no ICP; ~15–30 ms to the mainland and far more reliable than the US/EU origin (still GFW-throttleable, but much less).
+- Either way: deploy via GitHub Actions on push to `main`, set `rel="canonical"` back to `semantify.co`, and add a small mainland-visitor banner/link on the main site.
+
+The marketing site is fully static-exportable (no SSR), so the export step is straightforward.
 
 ---
 
