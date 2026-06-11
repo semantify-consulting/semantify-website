@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Metaballs } from "@paper-design/shaders-react";
 import Reveal from "@/components/Reveal";
+import BookingFallback from "@/components/BookingFallback";
 
 export default function Hero() {
   return (
@@ -59,6 +60,7 @@ export default function Hero() {
             View Services
           </Link>
         </div>
+        <BookingFallback className="text-center pt-3 w-full" />
       </Reveal>
     </section>
   );

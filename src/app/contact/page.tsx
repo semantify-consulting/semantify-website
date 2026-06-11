@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import BookingFallback from "@/components/BookingFallback";
 
 export const metadata: Metadata = {
   title: "Semantify — Get in Touch",
@@ -36,6 +37,7 @@ export default function ContactPage() {
             >
               Request a 30-min scoping call →
             </a>
+            <BookingFallback />
           </div>
 
           {/* Social row */}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { flagships, getService } from "@/lib/services";
+import BookingFallback from "@/components/BookingFallback";
 
 export function generateStaticParams() {
   return flagships.map((s) => ({ slug: s.slug }));
@@ -124,6 +125,7 @@ export default async function ServiceDetailPage({
           >
             Book a 30-min scoping call
           </a>
+          <BookingFallback className="text-center" />
         </aside>
       </div>
     </main>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { retainers } from "@/lib/services";
+import BookingFallback from "@/components/BookingFallback";
 
 export const metadata: Metadata = {
   title: "Semantify — Retainers: Advisory, Programme Office & PID Monitoring",
@@ -99,6 +100,7 @@ export default function RetainersPage() {
                 >
                   Book a 30-min scoping call
                 </a>
+                <BookingFallback className="text-center" />
               </aside>
             </div>
           </section>
