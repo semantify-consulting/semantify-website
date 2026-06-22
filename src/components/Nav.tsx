@@ -31,7 +31,7 @@ export default function Nav() {
     >
       <Link href="/" aria-label="Semantify" className="inline-flex items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/semantify-wordmark.svg" alt="Semantify" className="h-9 md:h-10 w-auto" />
+        <img src="/semantify-wordmark-dark.png" alt="Semantify" className="h-9 md:h-10 w-auto" />
       </Link>
 
       {/* Mobile menu button */}

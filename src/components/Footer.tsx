@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="flex flex-col items-center gap-6 px-6 md:px-20 py-8 md:py-10 border-t border-[#E8E7E3]">
       <div className="flex flex-col items-center gap-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/semantify-wordmark.svg" alt="Semantify" className="h-6 w-auto" />
+        <img src="/semantify-wordmark-dark.png" alt="Semantify" className="h-6 w-auto" />
         <span className="font-body text-sm text-[#9A9A9A]">
           Semantic infrastructure consulting for research data ecosystems.
         </span>

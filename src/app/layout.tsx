@@ -32,7 +32,7 @@ const jsonLd = {
       "@id": "https://semantify.co/#organization",
       name: "Semantify",
       url: "https://semantify.co",
-      logo: "https://semantify.co/semantify-wordmark.svg",
+      logo: "https://semantify.co/semantify-wordmark-dark.png",
       description: SITE_DESCRIPTION,
       founder: [
         { "@type": "Person", name: "Sara El-Gebali" },
