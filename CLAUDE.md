@@ -1,5 +1,8 @@
 # Semantify Website — Project Context
 
+## Language
+All work output must be in **English** — code, comments, commit messages, PR/issue titles and bodies, documentation, and any artifacts committed or published. The user may interact in Chinese, and conversational replies in chat may be in Chinese, but everything produced as work product is English-only.
+
 ## Project
 This is the **public** repository for the Semantify landing page website. Semantify is a consulting partnership (Sara El-Gebali + Xiaoli Chen) providing semantic infrastructure and metadata architecture services for research data ecosystems. Business/project documents (business plan, setup checklist, templates) live in a **separate private repository**: `semantify-consulting/semantify`.
 
