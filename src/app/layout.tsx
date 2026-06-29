@@ -35,7 +35,8 @@ const jsonLd = {
       logo: "https://semantify.co/semantify-wordmark-dark.png",
       description: SITE_DESCRIPTION,
       founder: [
-        { "@type": "Person", name: "Sara El-Gebali" },
+        // Sara El-Gebali temporarily omitted while her profile is "to be
+        // announced" (issue #14). Restore alongside the About Us profile.
         { "@type": "Person", name: "Xiaoli Chen" },
       ],
       sameAs: [

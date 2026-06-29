@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Semantify — About Sara El-Gebali & Xiaoli Chen",
+  // issue #14: when Sara's profile returns, restore the title
+  // "Semantify — About Sara El-Gebali & Xiaoli Chen".
+  title: "Semantify — About Us",
   description:
     "Semantify helps research organizations, repositories, and funders design metadata and PID systems that interoperate — and make sure they get adopted. Meet the founders.",
 };
@@ -32,11 +34,16 @@ interface Founder {
   site: string;
   siteLabel: string;
   socials: Social[];
+  // When true, render the "To be announced" placeholder instead of the full
+  // profile. Keeps all data below intact so the profile is easy to restore.
+  comingSoon?: boolean;
 }
 
 const founders: Founder[] = [
   {
     name: "Sara El-Gebali",
+    // Temporarily hidden (issue #14) — shows the placeholder. Remove to restore.
+    comingSoon: true,
     role: "Semantic infrastructure architect",
     bio: "Semantic infrastructure architect with hands-on production curation experience at EMBL-EBI (Pfam / InterPro), now a DataCite Metadata Specialist driving FAIR Digital Object work and Bioschemas / DataCite schema harmonisation.",
     location: "Based in Stockholm, Sweden",
@@ -175,6 +182,13 @@ const founders: Founder[] = [
   },
 ];
 
+// Render active profiles first; any "to be announced" placeholder sits last.
+// Removing a founder's `comingSoon` flag restores their original ordering.
+const orderedFounders: Founder[] = [
+  ...founders.filter((f) => !f.comingSoon),
+  ...founders.filter((f) => f.comingSoon),
+];
+
 const SOCIAL_LABEL: Record<SocialKind, string> = {
   orcid: "ORCID",
   github: "GitHub",
@@ -242,6 +256,41 @@ function FounderSection({ section }: { section: Section }) {
   );
 }
 
+function FounderPlaceholder() {
+  return (
+    <div className="flex flex-col items-center text-center gap-5 max-w-[1100px] mx-auto py-8">
+      <div className="flex items-center justify-center w-28 h-28 rounded-full border border-dashed border-[#D8D7D3] bg-white">
+        <svg
+          width="44"
+          height="44"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-[#CFCEC9]"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" />
+        </svg>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <p className="font-body text-[12px] font-medium tracking-[0.1em] uppercase text-muted">
+          Co-founder
+        </p>
+        <h2 className="font-display text-[26px] md:text-[30px] font-bold text-dark tracking-tight leading-8">
+          To be announced
+        </h2>
+        <p className="font-body text-[15px] text-light-muted">
+          New co-founder profile coming soon
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function AboutUsPage() {
   return (
     <main>
@@ -256,20 +305,24 @@ export default function AboutUsPage() {
         <p className="font-body text-[17px] md:text-lg text-light-muted leading-7 md:leading-8 max-w-[720px]">
           Semantify helps research organizations, repositories, and funders design
           metadata and PID systems that interoperate — and make sure they get adopted.
-          Sara El-Gebali brings semantic architecture from EMBO, EMBL-EBI, SciLifeLab
-          and DataCite. Xiaoli Chen brings programme leadership from CERN, DataCite,
-          FORCE11 and RDA. We work remotely, globally.
+          {/* issue #14: when Sara's profile returns, restore the founders-bio sentence:
+              "Sara El-Gebali brings semantic architecture from EMBO, EMBL-EBI, SciLifeLab
+              and DataCite. Xiaoli Chen brings programme leadership from CERN, DataCite,
+              FORCE11 and RDA. We work remotely, globally." */}
         </p>
       </section>
 
       {/* Founders */}
       <div className="flex flex-col">
-        {founders.map((f, idx) => (
+        {orderedFounders.map((f, idx) => (
           <section
-            key={f.name}
+            key={f.comingSoon ? "founder-tba" : f.name}
             className={`px-6 md:px-20 py-16 md:py-20 ${idx % 2 === 1 ? "bg-offwhite" : ""}`}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10 lg:gap-16 max-w-[1100px] mx-auto">
+            {f.comingSoon ? (
+              <FounderPlaceholder />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10 lg:gap-16 max-w-[1100px] mx-auto">
               {/* Left rail */}
               <div className="flex flex-col gap-5 lg:sticky lg:top-10 h-fit">
                 <div className="relative w-28 h-28 rounded-full overflow-hidden border border-[#E8E7E3] bg-white shrink-0">
@@ -327,7 +380,8 @@ export default function AboutUsPage() {
                   </div>
                 </div>
               </div>
-            </div>
+              </div>
+            )}
           </section>
         ))}
       </div>
